@@ -366,7 +366,7 @@ def register_schematic_router(mcp: FastMCP) -> None:
                 footprint=footprint,
             )
             for key, val in props.items():
-                comp.set_property(key, val)
+                comp.add_property(key, val, hidden=True)
             logger.info("Added component %s (%s) = %s at %s", reference, lib_id, value, pos)
             return {
                 "status": "ok",
