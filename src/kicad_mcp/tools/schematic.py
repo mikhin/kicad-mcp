@@ -19,6 +19,7 @@ import kicad_mcp.tools.schematic_impl as _sch_mod
 from kicad_mcp.tools.schematic_impl import (
     _require_schematic,
     _snap,
+    _parse_rgba,
     _kicad_pin_position,
     _pin_wire_offset,
     _find_component_for_pin,
@@ -95,6 +96,7 @@ def register_schematic_router(mcp: FastMCP) -> None:
         component_ref: Optional[str] = None,
         # ── Wires ─────────────────────────────────────────────────────────
         start_pos: Optional[List[float]] = None,
+        color: Optional[List[float]] = None,
         end_pos: Optional[List[float]] = None,
         wire_uuid: Optional[str] = None,
         comp1_ref: Optional[str] = None,
@@ -169,12 +171,14 @@ def register_schematic_router(mcp: FastMCP) -> None:
               Netlist-based query; reads .kicad_pro + extracts schematic netlist.
 
         # Wires (verb-overlap pair — pick by what you have)
-          add_wire(start_pos, end_pos) -> {status, wire_uuid, start, end}
+          add_wire(start_pos, end_pos, color?) -> {status, wire_uuid, start, end}
               Add wire by absolute [x, y] coordinates.
           add_wire_between_pins(comp1_ref, pin1, comp2_ref, pin2)
               -> {status, pins, segments, segment_count}
               Add wire by component+pin refs — preferred when you have refs.
           remove_wire(wire_uuid) -> {status, wire_uuid}
+          set_wire_color(wire_uuid, color) -> {status, wire_uuid, color}
+              color: [r, g, b] or [r, g, b, a], 0-255 (alpha 0-1, default 1).
           add_junction(position, diameter=0) -> {status, junction_uuid, position}
 
         # Labels (verb-overlap family — pick by intent)
@@ -672,10 +676,17 @@ def register_schematic_router(mcp: FastMCP) -> None:
                 return {"error": "operation='add_wire' requires 'end_pos'"}
             if len(start_pos) != 2 or len(end_pos) != 2:
                 return {"error": "Positions must be [x, y] coordinates"}
+            try:
+                rgba = _parse_rgba(color) if color is not None else None
+            except ValueError as e:
+                return {"error": str(e)}
             sch = _require_schematic()
             sp = list(_snap(start_pos[0], start_pos[1]))
             ep = list(_snap(end_pos[0], end_pos[1]))
             wire_uuid = sch.add_wire(start=tuple(sp), end=tuple(ep))
+            if rgba is not None:
+                sch.wires.get(wire_uuid).stroke_color = rgba
+                sch.wires._mark_modified()
             return {"status": "ok", "wire_uuid": wire_uuid, "start": sp, "end": ep}
 
         if operation == "add_wire_between_pins":
@@ -735,6 +746,23 @@ def register_schematic_router(mcp: FastMCP) -> None:
             if removed:
                 return {"status": "ok", "wire_uuid": wire_uuid}
             return {"error": f"Wire {wire_uuid} not found"}
+
+        if operation == "set_wire_color":
+            if wire_uuid is None:
+                return {"error": "operation='set_wire_color' requires 'wire_uuid'"}
+            if color is None:
+                return {"error": "operation='set_wire_color' requires 'color'"}
+            try:
+                rgba = _parse_rgba(color)
+            except ValueError as e:
+                return {"error": str(e)}
+            sch = _require_schematic()
+            wire = sch.wires.get(wire_uuid)
+            if wire is None:
+                return {"error": f"Wire {wire_uuid} not found"}
+            wire.stroke_color = rgba
+            sch.wires._mark_modified()
+            return {"status": "ok", "wire_uuid": wire_uuid, "color": list(rgba)}
 
         if operation == "add_junction":
             if position is None:
@@ -1043,7 +1071,7 @@ def register_schematic_router(mcp: FastMCP) -> None:
                 f"add_component|add_multi_unit_component|remove_component|move_component|"
                 f"list_components|filter_components|components_in_area|bulk_update_components|"
                 f"get_component_pin_position|list_component_pins|find_component_connections|"
-                f"add_wire|add_wire_between_pins|remove_wire|add_junction|"
+                f"add_wire|add_wire_between_pins|remove_wire|set_wire_color|add_junction|"
                 f"add_label|add_label_to_pin|add_hierarchical_label|connect_pins_with_labels|"
                 f"remove_label|edit_label|"
                 f"add_text|add_text_box|"

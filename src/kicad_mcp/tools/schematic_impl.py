@@ -42,6 +42,19 @@ def _snap(x: float, y: float) -> tuple:
     return (round(round(x / g) * g, 6), round(round(y / g) * g, 6))
 
 
+def _parse_rgba(color: list) -> tuple:
+    """Validate [r, g, b] or [r, g, b, a] (0-255, alpha 0-1) into a KiCad (r, g, b, a) tuple."""
+    if len(color) not in (3, 4):
+        raise ValueError("color must be [r, g, b] or [r, g, b, a]")
+    r, g, b = (int(c) for c in color[:3])
+    if not all(0 <= c <= 255 for c in (r, g, b)):
+        raise ValueError("color r, g, b must be 0-255")
+    a = color[3] if len(color) == 4 else 1
+    if not 0 <= a <= 1:
+        raise ValueError("color alpha must be 0-1")
+    return (r, g, b, int(a) if float(a).is_integer() else float(a))
+
+
 def _parse_unit_pin_mapping(symbol_def):
     """Parse raw KiCad symbol data to build {unit_num: [pin_numbers]} mapping.
 
