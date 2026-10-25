@@ -350,6 +350,38 @@ class TestAddWire:
         result = _call(fn, "remove_wire", wire_uuid="nonexistent-uuid")
         assert "error" in result
 
+    def _saved(self, fn, tmp_path):
+        out = tmp_path / "wires.kicad_sch"
+        _call(fn, "save", schematic_path=str(out))
+        return " ".join(out.read_text().split())
+
+    def test_add_wire_with_color(self, sch_server, tmp_path):
+        fn = _get_schematic_fn(sch_server)
+        result = _call(fn, "add_wire", start_pos=[100.0, 100.0], end_pos=[200.0, 100.0],
+                       color=[230, 25, 75])
+        assert result["status"] == "ok"
+        assert "(color 230 25 75 1)" in self._saved(fn, tmp_path)
+
+    def test_set_wire_color(self, sch_server, tmp_path):
+        fn = _get_schematic_fn(sch_server)
+        wire_uuid = _call(fn, "add_wire", start_pos=[100.0, 100.0],
+                          end_pos=[200.0, 100.0])["wire_uuid"]
+        result = _call(fn, "set_wire_color", wire_uuid=wire_uuid, color=[0, 130, 200, 1])
+        assert result["status"] == "ok"
+        assert "(color 0 130 200 1)" in self._saved(fn, tmp_path)
+
+    def test_set_wire_color_unknown_wire(self, sch_server):
+        fn = _get_schematic_fn(sch_server)
+        result = _call(fn, "set_wire_color", wire_uuid="nonexistent-uuid", color=[1, 2, 3])
+        assert "error" in result
+
+    def test_set_wire_color_bad_color(self, sch_server):
+        fn = _get_schematic_fn(sch_server)
+        wire_uuid = _call(fn, "add_wire", start_pos=[100.0, 100.0],
+                          end_pos=[200.0, 100.0])["wire_uuid"]
+        assert "error" in _call(fn, "set_wire_color", wire_uuid=wire_uuid, color=[300, 0, 0])
+        assert "error" in _call(fn, "set_wire_color", wire_uuid=wire_uuid, color=[1, 2])
+
 
 # -- add_label tests ---------------------------------------------------------
 
