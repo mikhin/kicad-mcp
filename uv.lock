@@ -1247,7 +1247,7 @@ requires-dist = [
     { name = "defusedxml", specifier = ">=0.7.1" },
     { name = "fastmcp", specifier = ">=4.0.10" },
     { name = "filelock", specifier = ">=4.1.0" },
-    { name = "kicad-sch-api", git = "https://github.com/mikhin/kicad-sch-api.git?rev=cf84c34c2ce0e3099d9c02e7edde745944916dc1" },
+    { name = "kicad-sch-api", git = "https://github.com/mikhin/kicad-sch-api.git?rev=ff16ae5bfb64875048889c58f10ba82a6aa18a91" },
     { name = "mcp-agent-notes", git = "https://github.com/blwfish/mcp-agent-notes.git?rev=dd83adf8bb97755f91dbfcf857dbaeb987883f8f" },
     { name = "mcp-events", specifier = ">=0.1.0" },
     { name = "networkx", specifier = ">=3.0" },
@@ -1272,7 +1272,7 @@ dev = [
 [[package]]
 name = "kicad-sch-api"
 version = "0.5.6"
-source = { git = "https://github.com/mikhin/kicad-sch-api.git?rev=cf84c34c2ce0e3099d9c02e7edde745944916dc1#cf84c34c2ce0e3099d9c02e7edde745944916dc1" }
+source = { git = "https://github.com/mikhin/kicad-sch-api.git?rev=ff16ae5bfb64875048889c58f10ba82a6aa18a91#ff16ae5bfb64875048889c58f10ba82a6aa18a91" }
 dependencies = [
     { name = "fastmcp" },
     { name = "jinja2" },

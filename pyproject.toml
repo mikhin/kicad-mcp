@@ -30,7 +30,7 @@ dependencies = [
     "fastmcp>=4.0.10",
     "authlib>=1.8.0",
     # Fork with save/filter fixes pending upstream (mikhin/kicad-sch-api, branch integration).
-    "kicad-sch-api @ git+https://github.com/mikhin/kicad-sch-api.git@cf84c34c2ce0e3099d9c02e7edde745944916dc1",
+    "kicad-sch-api @ git+https://github.com/mikhin/kicad-sch-api.git@ff16ae5bfb64875048889c58f10ba82a6aa18a91",
     "pyyaml>=6.0.3",
     "defusedxml>=0.7.1",
     "python-multipart>=0.0.32",
