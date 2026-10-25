@@ -19,6 +19,7 @@ import kicad_mcp.tools.schematic_impl as _sch_mod
 from kicad_mcp.tools.schematic_impl import (
     _require_schematic,
     _snap,
+    _parse_properties,
     _kicad_pin_position,
     _pin_wire_offset,
     _find_component_for_pin,
@@ -147,6 +148,8 @@ def register_schematic_router(mcp: FastMCP) -> None:
         # Components — CRUD
           add_component(lib_id, reference, value, position, footprint?, properties?)
               -> {status, reference, lib_id, value, position}
+              properties: JSON object '{"MPN": "X1"}' or "MPN=X1, Note=..."
+              (custom fields, added hidden); malformed input is an error.
           add_multi_unit_component(lib_id, reference, value, position,
                                    units?, footprint?, unit_spacing=15)
               -> {status, reference, total_units, units}   for multi-unit symbols
@@ -349,6 +352,10 @@ def register_schematic_router(mcp: FastMCP) -> None:
                 return {"error": "operation='add_component' requires 'position'"}
             if len(position) != 2:
                 return {"error": "position must be [x, y]"}
+            try:
+                props = _parse_properties(properties) if properties else {}
+            except ValueError as e:
+                return {"error": str(e)}
             sch = _require_schematic()
             pos = list(_snap(position[0], position[1]))
             comp = sch.components.add(
@@ -358,11 +365,8 @@ def register_schematic_router(mcp: FastMCP) -> None:
                 position=tuple(pos),
                 footprint=footprint,
             )
-            if properties:
-                for prop in properties.split(","):
-                    if "=" in prop:
-                        key, val = prop.strip().split("=", 1)
-                        comp.set_property(key.strip(), val.strip())
+            for key, val in props.items():
+                comp.set_property(key, val)
             logger.info("Added component %s (%s) = %s at %s", reference, lib_id, value, pos)
             return {
                 "status": "ok",

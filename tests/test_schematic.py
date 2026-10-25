@@ -105,6 +105,38 @@ class TestAddAndListComponents:
                        position=[100.0])  # missing y
         assert "error" in result
 
+    def _properties_of(self, reference):
+        return sch_module._current_schematic.components.get(reference).properties
+
+    def test_add_component_properties_json(self, sch_server):
+        fn = _get_schematic_fn(sch_server)
+        result = _call(fn, "add_component",
+                       lib_id="Device:R", reference="R1", value="10k",
+                       position=[100, 100],
+                       properties='{"MPN": "RC0805FR-0710KL", "Note": "a, b"}')
+        assert result["status"] == "ok"
+        props = self._properties_of("R1")
+        assert props["MPN"] == "RC0805FR-0710KL"
+        assert props["Note"] == "a, b"
+
+    def test_add_component_properties_key_value(self, sch_server):
+        fn = _get_schematic_fn(sch_server)
+        result = _call(fn, "add_component",
+                       lib_id="Device:R", reference="R1", value="10k",
+                       position=[100, 100], properties="MPN=X1, Status=stock")
+        assert result["status"] == "ok"
+        props = self._properties_of("R1")
+        assert props["MPN"] == "X1"
+        assert props["Status"] == "stock"
+
+    def test_add_component_malformed_properties_is_an_error(self, sch_server):
+        fn = _get_schematic_fn(sch_server)
+        result = _call(fn, "add_component",
+                       lib_id="Device:R", reference="R1", value="10k",
+                       position=[100, 100], properties="MPN X1")
+        assert "error" in result
+        assert _call(fn, "list_components")["count"] == 0
+
     def test_list_components_empty(self, sch_server):
         fn = _get_schematic_fn(sch_server)
         result = _call(fn, "list_components")

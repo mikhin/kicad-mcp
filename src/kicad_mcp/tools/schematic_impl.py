@@ -11,6 +11,7 @@ round-trip parsing of .kicad_sch files.
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 
@@ -40,6 +41,33 @@ def _snap(x: float, y: float) -> tuple:
     """Round both coordinates to the nearest KiCad schematic grid step."""
     g = SCHEMATIC_GRID_MM
     return (round(round(x / g) * g, 6), round(round(y / g) * g, 6))
+
+
+def _parse_properties(properties: str) -> dict[str, str]:
+    """Parse component properties given as a JSON object or as ``Key=Value, Key2=Value2``.
+
+    Raises ValueError on anything else, so properties are never dropped silently.
+    """
+    text = properties.strip()
+    if text.startswith("{"):
+        try:
+            parsed = json.loads(text)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"properties is not valid JSON: {e}") from e
+        if not isinstance(parsed, dict):
+            raise ValueError("properties JSON must be an object")
+        return {str(k): str(v) for k, v in parsed.items()}
+
+    result: dict[str, str] = {}
+    for pair in text.split(","):
+        if "=" not in pair:
+            raise ValueError(
+                f"properties entry {pair.strip()!r} is not Key=Value; "
+                'pass "Key=Value, Key2=Value2" or a JSON object'
+            )
+        key, val = pair.split("=", 1)
+        result[key.strip()] = val.strip()
+    return result
 
 
 def _parse_unit_pin_mapping(symbol_def):
