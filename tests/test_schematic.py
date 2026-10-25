@@ -108,7 +108,7 @@ class TestAddAndListComponents:
     def _properties_of(self, reference):
         return sch_module._current_schematic.components.get(reference).properties
 
-    def test_add_component_properties_json(self, sch_server):
+    def test_add_component_properties_json(self, sch_server, tmp_path):
         fn = _get_schematic_fn(sch_server)
         result = _call(fn, "add_component",
                        lib_id="Device:R", reference="R1", value="10k",
@@ -118,6 +118,11 @@ class TestAddAndListComponents:
         props = self._properties_of("R1")
         assert props["MPN"] == "RC0805FR-0710KL"
         assert props["Note"] == "a, b"
+        out = tmp_path / "props.kicad_sch"
+        _call(fn, "save", schematic_path=str(out))
+        saved = " ".join(out.read_text().split())
+        mpn = saved[saved.index('(property "MPN"'):]
+        assert "(hide yes)" in mpn[:mpn.index("(property", 1)]
 
     def test_add_component_properties_key_value(self, sch_server):
         fn = _get_schematic_fn(sch_server)
