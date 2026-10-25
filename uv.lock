@@ -1247,7 +1247,7 @@ requires-dist = [
     { name = "defusedxml", specifier = ">=0.7.1" },
     { name = "fastmcp", specifier = ">=4.0.10" },
     { name = "filelock", specifier = ">=4.1.0" },
-    { name = "kicad-sch-api", specifier = ">=0.5.6" },
+    { name = "kicad-sch-api", git = "https://github.com/mikhin/kicad-sch-api.git?rev=cf84c34c2ce0e3099d9c02e7edde745944916dc1" },
     { name = "mcp-agent-notes", git = "https://github.com/blwfish/mcp-agent-notes.git?rev=dd83adf8bb97755f91dbfcf857dbaeb987883f8f" },
     { name = "mcp-events", specifier = ">=0.1.0" },
     { name = "networkx", specifier = ">=3.0" },
@@ -1272,7 +1272,7 @@ dev = [
 [[package]]
 name = "kicad-sch-api"
 version = "0.5.6"
-source = { registry = "https://pypi.org/simple" }
+source = { git = "https://github.com/mikhin/kicad-sch-api.git?rev=cf84c34c2ce0e3099d9c02e7edde745944916dc1#cf84c34c2ce0e3099d9c02e7edde745944916dc1" }
 dependencies = [
     { name = "fastmcp" },
     { name = "jinja2" },
@@ -1280,10 +1280,6 @@ dependencies = [
     { name = "pydantic" },
     { name = "sexpdata" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/80/38/cc778c53ad8b15da1e5b49146c640c0e0eb6a86b0d8270459d59cf042d23/kicad_sch_api-0.5.6.tar.gz", hash = "sha256:f001faffdf1745d7a52e90636be2bc4ae3463909491fff9f9d40fe1f7842d36e", size = 391722, upload-time = "2025-11-19T07:00:43.344Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/e8/f5/f042a3f61aa919c6ad2ecdb0e7ec6d9c3b184388363a5a1c46f127513ca3/kicad_sch_api-0.5.6-py3-none-any.whl", hash = "sha256:70935184dca35eed17bffa8958e93f7fe02512fd0c44d6be9f22ddc54e39d164", size = 329065, upload-time = "2025-11-19T07:00:41.748Z" },
 ]
 
 [[package]]

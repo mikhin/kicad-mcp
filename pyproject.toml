@@ -29,7 +29,8 @@ requires-python = ">=3.10"
 dependencies = [
     "fastmcp>=4.0.10",
     "authlib>=1.8.0",
-    "kicad-sch-api>=0.5.6",
+    # Fork with save/filter fixes pending upstream (mikhin/kicad-sch-api, branch integration).
+    "kicad-sch-api @ git+https://github.com/mikhin/kicad-sch-api.git@cf84c34c2ce0e3099d9c02e7edde745944916dc1",
     "pyyaml>=6.0.3",
     "defusedxml>=0.7.1",
     "python-multipart>=0.0.32",
